@@ -1,0 +1,49 @@
+name: Validate skills
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate and export (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            dji-export/requirements.txt
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            brew install ffmpeg
+          fi
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (!(Get-Command ffmpeg -ErrorAction SilentlyContinue) -or !(Get-Command ffprobe -ErrorAction SilentlyContinue)) {
+            choco install ffmpeg --yes --no-progress
+          }
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Validate skill metadata, links and scripts
+        run: python scripts/validate_skills.py
+      - name: Require RAW decoder and H.264 encoder
+        run: python dji-export/scripts/export_timelapse.py --check
+      - name: Test safety and real DNG-to-MP4 export
+        run: python -m unittest discover -s tests -v

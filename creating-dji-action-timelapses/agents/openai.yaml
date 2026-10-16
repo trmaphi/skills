@@ -1,4 +1,0 @@
-interface:
-  display_name: "DJI Action Timelapses"
-  short_description: "Convert DJI Action DNG sequences into MP4"
-  default_prompt: "Use $creating-dji-action-timelapses to render my next DJI Action DNG timelapse."

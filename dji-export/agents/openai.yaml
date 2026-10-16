@@ -1,0 +1,4 @@
+interface:
+  display_name: "DJI Export"
+  short_description: "Export DJI DNG timelapses on macOS and Windows"
+  default_prompt: "Use $dji-export to export my DJI Action DNG timelapse to a verified MP4."

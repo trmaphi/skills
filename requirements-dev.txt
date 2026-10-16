@@ -1,0 +1,3 @@
+-r dji-export/requirements.txt
+PyYAML>=6,<7
+tifffile>=2025.1.10,<2027
